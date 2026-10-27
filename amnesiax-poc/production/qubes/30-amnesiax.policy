@@ -1,0 +1,31 @@
+## ==============================================================================
+## AMNESIAX — Hardened Qubes OS 4.2+ qrexec Policy
+## Location: /etc/qubes/policy.d/30-amnesiax.policy
+## ==============================================================================
+
+## -----------------------------------------------------------------------------
+## 1. CLIPBOARD POLICY: Zero unmediated clipboard copy to amnesiax-vault
+## -----------------------------------------------------------------------------
+# Deny clipboard paste from ANY disposable or untrusted qube into vault
+qubes.ClipboardPaste  *  @dispvm            amnesiax-vault   deny
+qubes.ClipboardPaste  *  amnesiax-dvm       amnesiax-vault   deny
+qubes.ClipboardPaste  *  amnesiax-files     amnesiax-vault   deny
+
+# Allow standard clipboard interaction between general domains with notification
+qubes.ClipboardPaste  *  @anyvm             @anyvm           allow notify=yes
+
+## -----------------------------------------------------------------------------
+## 2. FILE TRANSFER POLICY: Explicit interactive prompt (ask) required
+## -----------------------------------------------------------------------------
+# Never allow silent file transfers into amnesiax-vault
+qubes.Filecopy        *  @anyvm             amnesiax-vault   ask default_target=amnesiax-vault
+qubes.Filecopy        *  amnesiax-vault     @anyvm           ask
+
+# Allow file transfers into air-gapped document inspector for scanning
+qubes.Filecopy        *  @anyvm             amnesiax-files   allow notify=yes
+
+## -----------------------------------------------------------------------------
+## 3. AIR-GAPPED VAULT RPC LOCKDOWN
+## -----------------------------------------------------------------------------
+# Deny all other inter-qube RPC mechanisms targeting amnesiax-vault
+*                     *  @anyvm             amnesiax-vault   deny notify=yes
